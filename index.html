@@ -57,17 +57,32 @@
             width: 0;
             height: 0;
         }
+
+        footer{
+            margin: 0;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>YouTube Music Search</h1>
+    <h1>Music Player | Poison</h1>
     <input type="text" id="searchBox" placeholder="Search for a song or artist...">
     <button onclick="searchMusic()">Search</button>
     
     <div id="results"></div>
 
     <div id="player"></div> <!-- hidden player-->
+<!-- 
+    <footer>
+        <p>Enjoy your music! Stay connected:</p>
+        <div class="social-icons">
+            <a href="https://wa.me/" target="_blank">&#x1F4AC;</a>
+            <a href="https://t.me/" target="_blank">&#x1F426;</a>
+            <a href="https://github.com/" target="_blank">&#x1F5C3;</a>
+            <a href="https://twitter.com/" target="_blank">&#x1F426;</a>
+        </div>
+    </footer> -->
 
     <script>
         let apiKey = "AIzaSyAbiMR7LjCpEIsQoXRnFcLs45piQZxhEkQ"; 
