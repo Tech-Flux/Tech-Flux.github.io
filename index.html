@@ -3,157 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Plans & Coin Purchase</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <title>Music | Player</title>
+    <script src="https://www.youtube.com/iframe_api"></script> <!-- YouTube API -->
     <style>
         body {
-            background: linear-gradient(to right, #6a11cb, #2575fc);
-            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
         }
-        .card {
-            background: rgba(255, 255, 255, 0.9);
-            transition: transform 0.3s, box-shadow 0.3s;
+        #searchBox {
+            padding: 10px;
+            width: 80%;
+            max-width: 400px;
+            margin: 10px;
         }
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        .song {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin: 5px auto;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+            background: #fff;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
-        .table {
-            background: rgba(255, 255, 255, 0.9);
-            color: #000;
+        img {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
         }
-        .table-primary {
-            background-color: #2575fc !important;
-            color: #fff;
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+            border: none;
+            background: #28a745;
+            color: white;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .play-btn {
+            background: #007bff;
+        }
+        .play-btn:hover {
+            background: #0056b3;
+        }
+        #player {
+            display: none; /* Hide video player */
+            width: 0;
+            height: 0;
         }
     </style>
 </head>
 <body>
-    <div class="container py-5">
-        <!-- Premium Plans Section -->
-        <h1 class="text-center mb-5">Premium Plans</h1>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-            <!-- Free Plan -->
-            <div class="col">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Free Plan</h5>
-                        <p class="fs-3 fw-bold">$0</p>
-                        <ul class="list-unstyled">
-                            <li><i class="bi bi-x-circle-fill text-danger"></i> Unlimited Downloads</li>
-                            <li><i class="bi bi-x-circle-fill text-danger"></i> Unlimited Coins</li>
-                            <li><i class="bi bi-x-circle-fill text-danger"></i> 50MB Max Size</li>
-                        </ul>
-                        <button class="btn btn-secondary w-100" disabled>Current Plan</button>
-                    </div>
-                </div>
-            </div>
 
-            <!-- 1 Month Plan -->
-            <div class="col">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">1 Month</h5>
-                        <p class="fs-3 fw-bold">$5</p>
-                        <ul class="list-unstyled">
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Unlimited Downloads</li>
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Unlimited Coins</li>
-                            <li><i class="bi bi-check-circle-fill text-success"></i> 50MB Max Size</li>
-                        </ul>
-                        <button class="btn btn-primary w-100">Choose Plan</button>
-                    </div>
-                </div>
-            </div>
+    <h1>YouTube Music Search</h1>
+    <input type="text" id="searchBox" placeholder="Search for a song or artist...">
+    <button onclick="searchMusic()">Search</button>
+    
+    <div id="results"></div>
 
-            <!-- 6 Months Plan -->
-            <div class="col">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">6 Months</h5>
-                        <p class="fs-3 fw-bold">$10</p>
-                        <ul class="list-unstyled">
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Unlimited Downloads</li>
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Unlimited Coins</li>
-                            <li><i class="bi bi-check-circle-fill text-success"></i> 100MB Max Size</li>
-                        </ul>
-                        <button class="btn btn-primary w-100">Choose Plan</button>
-                    </div>
-                </div>
-            </div>
+    <div id="player"></div> <!-- hidden player-->
 
-            <!-- Annually Plan -->
-            <div class="col">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Annually</h5>
-                        <p class="fs-3 fw-bold">$18</p>
-                        <ul class="list-unstyled">
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Unlimited Downloads</li>
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Unlimited Coins</li>
-                            <li><i class="bi bi-check-circle-fill text-success"></i> 100MB Max Size</li>
-                        </ul>
-                        <button class="btn btn-primary w-100">Choose Plan</button>
-                    </div>
-                </div>
-            </div>
+    <script>
+        let apiKey = "AIzaSyAbiMR7LjCpEIsQoXRnFcLs45piQZxhEkQ"; 
+        let player;
+        let currentVideoId = "";
+        let apiReady = false;
+    
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '0',
+                width: '0',
+                videoId: '',
+                playerVars: {
+                    autoplay: 1,
+                    controls: 0,
+                    showinfo: 0,
+                    modestbranding: 1
+                },
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+            apiReady = true; 
+        }
+    
+        async function searchMusic() {
+            let query = document.getElementById('searchBox').value;
+            if (!query) {
+                alert('Please enter a song or artist name');
+                return;
+            }
+    
+            let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${encodeURIComponent(query)}+music&videoCategoryId=10&key=${apiKey}`;
+            let response = await fetch(url);
+            let data = await response.json();
+            
+            let resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+    
+            if (!data.items || data.items.length === 0) {
+                resultsDiv.innerHTML = '<p>No results found. Try another search.</p>';
+                return;
+            }
+    
+            data.items.forEach(video => {
+                let videoId = video.id.videoId;
+                let title = video.snippet.title;
+                let thumbnail = video.snippet.thumbnails.default.url;
+    
+                let songDiv = document.createElement('div');
+                songDiv.className = 'song';
+    
+                songDiv.innerHTML = `
+                    <img src="${thumbnail}" alt="Thumbnail">
+                    <div><strong>${title}</strong></div>
+                    <button class="play-btn" onclick="playAudio('${videoId}', this)">▶ Play</button>
+                `;
+                resultsDiv.appendChild(songDiv);
+            });
+        }
 
-            <!-- Lifetime Plan -->
-            <div class="col">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Lifetime</h5>
-                        <p class="fs-3 fw-bold">$99.9</p>
-                        <ul class="list-unstyled">
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Unlimited Downloads</li>
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Unlimited Coins</li>
-                            <li><i class="bi bi-check-circle-fill text-success"></i> 100MB Max Size</li>
-                        </ul>
-                        <button class="btn btn-primary w-100">Choose Plan</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
+    
+    function playAudio(videoId, button) {
+    if (!apiReady || !player) {
+        alert("Player not ready! Please wait a few seconds and try again.");
+        return;
+    }
 
-        <!-- Coins Purchase Section -->
-        <h1 class="text-center mt-5 mb-4">Coin Purchase</h1>
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <table class="table table-bordered text-center">
-                    <thead class="table-primary">
-                        <tr>
-                            <th>Coins</th>
-                            <th>Price (USD)</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1,000</td>
-                            <td>$0.2</td>
-                            <td><button class="btn btn-success">Buy</button></td>
-                        </tr>
-                        <tr>
-                            <td>2,000</td>
-                            <td>$0.4</td>
-                            <td><button class="btn btn-success">Buy</button></td>
-                        </tr>
-                        <tr>
-                            <td>5,000</td>
-                            <td>$1.0</td>
-                            <td><button class="btn btn-success">Buy</button></td>
-                        </tr>
-                        <tr>
-                            <td>10,000</td>
-                            <td>$2.0</td>
-                            <td><button class="btn btn-success">Buy</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    if (currentVideoId === videoId && player.getPlayerState() === 1) {
+        player.pauseVideo();
+        button.innerText = "▶ Play";
+    } else {
+        player.loadVideoById(videoId);
+        player.playVideo();
+        player.unMute(); // 🔊 
+        currentVideoId = videoId;
+        updateButtons(button);
+    }
+}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    
+        function updateButtons(activeButton) {
+            document.querySelectorAll('.play-btn').forEach(button => {
+                button.innerText = "▶ Play";
+            });
+            activeButton.innerText = "⏸ Pause";
+        }
+    
+        function onPlayerStateChange(event) {
+            if (event.data === 0) {
+                document.querySelectorAll('.play-btn').forEach(button => {
+                    button.innerText = "▶ Play";
+                });
+            }
+        }
+
+        function onPlayerStateChange(event) {
+        if (event.data === 0) { 
+            sessionStorage.removeItem("currentVideoId");
+            document.querySelectorAll('.play-btn').forEach(button => {
+                button.innerText = "▶ Play";
+            });
+        }
+    }
+
+    // Prevent reload chutya
+    window.addEventListener("beforeunload", function(event) {
+        if (currentVideoId) {
+            event.preventDefault();
+            event.returnValue = "Music is playing. Are you sure you want to leave?";
+        }
+    });
+    </script>
+    
